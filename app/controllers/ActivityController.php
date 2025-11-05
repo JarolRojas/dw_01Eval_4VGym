@@ -29,7 +29,20 @@ class ActivityController
             return ['success' => false, 'message' => 'Tipo de actividad no válido'];
         }
 
-        $activity = new Activity(null, $type, $monitor, $place, $date);
+        try {
+            $dt = new DateTime($date);
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => 'Fecha no válida'];
+        }
+
+        $now = new DateTime('now');
+        if ($dt < $now) {
+            return ['success' => false, 'message' => 'La fecha no puede ser anterior a la actual'];
+        }
+
+        $dateNormalized = $dt->format('Y-m-d H:i:s');
+
+        $activity = new Activity(null, $type, $monitor, $place, $dateNormalized);
         $id = $this->dao->insert($activity);
 
         if ($id > 0) {
@@ -48,8 +61,20 @@ class ActivityController
         if (!in_array($type, ['spinning', 'bodypump', 'pilates'])) {
             return ['success' => false, 'message' => 'Tipo de actividad no válido'];
         }
+        try {
+            $dt = new DateTime($date);
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => 'Fecha no válida'];
+        }
 
-        $activity = new Activity($id, $type, $monitor, $place, $date);
+        $now = new DateTime('now');
+        if ($dt < $now) {
+            return ['success' => false, 'message' => 'La fecha no puede ser anterior a la actual'];
+        }
+
+        $dateNormalized = $dt->format('Y-m-d H:i:s');
+
+        $activity = new Activity($id, $type, $monitor, $place, $dateNormalized);
         if ($this->dao->update($activity)) {
             return ['success' => true, 'message' => 'Actividad actualizada correctamente'];
         } else {

@@ -1,12 +1,7 @@
 <?php
 require_once(__DIR__ . '/app/controllers/ActivityController.php');
+require_once(__DIR__ . '/app/helpers/ActivityDateHelper.php');
 session_start();
-
-//TODO NO INSERTAR ACTIVIDADES CON FECHAS ANTERIORES
-//TODO VALIDAR CAMPOS DEL FORMULARIO
-//TODO FORMATEAR FECHA  -> 5 "NOVIEMBRE 2025 19:00"
-//TODO MENSAJES DE ERROR Y EXITO EN LA INSERCION
-//FIXME AL RECARGAR DESPUES DE INSERTAR, SE VUELVE A ENVIAR EL FORMULARIO
 
 $controller = new ActivityController();
 $message = '';
@@ -195,7 +190,7 @@ $requestedEditId = isset($_GET['editId']) ? intval($_GET['editId']) : null;
                             alt="<?php echo ($activity->getType()); ?>">
                         <div class="card-body">
                             <h2 class="card-title display-4"><?php echo ($activity->getPlace()); ?></h2>
-                            <p class="card-text lead"><?php echo ($activity->getDate()); ?></p>
+                            <p class="card-text lead"><?php echo htmlspecialchars(formatActivityDate($activity->getDate())); ?></p>
                             <p class="card-text lead"><?php echo ($activity->getMonitor()); ?></p>
                             <p class="card-text"><span class="badge bg-info"><?php echo ($activity->getType()); ?></span>
                             </p>
