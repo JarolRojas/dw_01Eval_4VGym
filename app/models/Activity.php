@@ -42,20 +42,5 @@ class Activity
     public function setPlace($place){$this->place = $place;}
 
     public function setDate($date){$this->date = $date;}
-
-
-
-
-
-    public function toArray()
-    {
-        return [
-            'id' => $this->id,
-            'type' => $this->type,
-            'monitor' => $this->monitor,
-            'place' => $this->place,
-            'date' => $this->date
-        ];
-    }
 }
 ?>

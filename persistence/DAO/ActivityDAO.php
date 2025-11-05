@@ -14,6 +14,13 @@ class ActivityDAO
         $this->conn = DBConfig::getConnection();
     }
 
+
+    /**
+     * Obtiene todas las actividades, opcionalmente filtradas por fecha
+     *
+     * @param string|null $date Fecha en formato 'Y-m-d' para filtrar actividades
+     * @return array Lista de actividades
+     */
     public function getAll($date = null)
     {
         $activities = [];
@@ -44,6 +51,12 @@ class ActivityDAO
         return $activities;
     }
 
+
+    /**
+     * Inserta una nueva actividad en la base de datos
+     * @param Activity $activity Objeto Activity a insertar
+     * @return bool Resultado de la operación
+     */
     public function insert(Activity $activity)
     {
         $type = $activity->getType();
@@ -57,6 +70,11 @@ class ActivityDAO
         return $stmt->execute();
     }
 
+    /**
+     * Actualiza una actividad existente en la base de datos
+     * @param Activity $activity Objeto Activity a actualizar
+     * @return bool Resultado de la operación
+     */
     public function update(Activity $activity)
     {
         $id = (int) $activity->getId();
@@ -72,6 +90,11 @@ class ActivityDAO
         return $stmt->execute();
     }
 
+    /**
+     * Elimina una actividad por su ID
+     * @param int $id ID de la actividad a eliminar
+     * @return bool Resultado de la operación
+     */
     public function delete($id)
     {
         $id = (int) $id;

@@ -1,4 +1,11 @@
 <?php
+
+/**
+ * Formatea la fecha de una actividad al formato "DIA MES AÑO HORA"
+ * Ejemplo: "5 MARZO 2024 14:30"
+ * @param string $date Fecha en formato 'Y-m-d H:i:s'
+ * @return string Fecha formateada
+ */
 if (!function_exists('formatActivityDate')) {
     function formatActivityDate($date)
     {

@@ -3,9 +3,12 @@ require_once(__DIR__ . '/app/controllers/ActivityController.php');
 require_once(__DIR__ . '/app/helpers/ActivityDateHelper.php');
 session_start();
 
+$rutaBase = '/DW_01EVAL_4VGym';
+
 $controller = new ActivityController();
 $message = '';
 $messageType = '';
+
 
 if (isset($_SESSION['flash_message'])) {
     $message = $_SESSION['flash_message'];
@@ -15,63 +18,53 @@ if (isset($_SESSION['flash_message'])) {
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $formAction = isset($_POST['form_action']) ? $_POST['form_action'] : 'create';
+    $formAction = isset($_POST['form_action']) ? $_POST['form_action'] : '';
 
-    if ($formAction === 'create') {
-        $type = isset($_POST['type']) ? trim($_POST['type']) : '';
-        $monitor = isset($_POST['monitor']) ? trim($_POST['monitor']) : '';
-        $place = isset($_POST['place']) ? trim($_POST['place']) : '';
-        $date = isset($_POST['date']) ? trim($_POST['date']) : '';
-
-        $result = $controller->create($type, $monitor, $place, $date);
-
-        if (isset($result['success']) && $result['success']) {
-            $_SESSION['flash_message'] = $result['message'];
-            $_SESSION['flash_type'] = 'success';
-            header('Location: index.php');
-            exit;
-        } else {
-            $message = $result['message'];
-            $messageType = 'danger';
-        }
-    } elseif ($formAction === 'update') {
+    if ($formAction === 'update') {
         $id = isset($_POST['id']) ? $_POST['id'] : null;
         $type = isset($_POST['type']) ? trim($_POST['type']) : '';
         $monitor = isset($_POST['monitor']) ? trim($_POST['monitor']) : '';
         $place = isset($_POST['place']) ? trim($_POST['place']) : '';
         $date = isset($_POST['date']) ? trim($_POST['date']) : '';
+        $scrollPos = isset($_POST['scroll_pos']) ? $_POST['scroll_pos'] : 0;
 
         $result = $controller->update($id, $type, $monitor, $place, $date);
         if (isset($result['success']) && $result['success']) {
             $_SESSION['flash_message'] = $result['message'];
             $_SESSION['flash_type'] = 'success';
+            $_SESSION['scroll_pos'] = $scrollPos;
             header('Location: index.php');
             exit;
         } else {
             $_SESSION['flash_message'] = $result['message'];
             $_SESSION['flash_type'] = 'danger';
+            $_SESSION['scroll_pos'] = $scrollPos;
             header('Location: index.php');
             exit;
         }
     } elseif ($formAction === 'delete') {
         $id = isset($_POST['id']) ? $_POST['id'] : null;
+        $scrollPos = isset($_POST['scroll_pos']) ? $_POST['scroll_pos'] : 0;
+
         $result = $controller->delete($id);
         if (isset($result['success']) && $result['success']) {
             $_SESSION['flash_message'] = $result['message'];
             $_SESSION['flash_type'] = 'success';
+            $_SESSION['scroll_pos'] = $scrollPos;
             header('Location: index.php');
             exit;
         } else {
             $_SESSION['flash_message'] = $result['message'];
             $_SESSION['flash_type'] = 'danger';
+            $_SESSION['scroll_pos'] = $scrollPos;
             header('Location: index.php');
             exit;
         }
     }
 }
 
-
-
+$scrollPos = isset($_SESSION['scroll_pos']) ? $_SESSION['scroll_pos'] : 0;
+unset($_SESSION['scroll_pos']);
 
 $activityDate = isset($_GET['activityDate']) ? $_GET['activityDate'] : null;
 $activities = $controller->getAll($activityDate);
@@ -118,7 +111,7 @@ $requestedEditId = isset($_GET['editId']) ? intval($_GET['editId']) : null;
                 </li>
             </ul>
             <div class="ml-auto">
-                <a type="button" class="btn btn-info " href="#SubirActividad"><span
+                <a type="button" class="btn btn-info " href="<?php echo $rutaBase . '/app/crearActividad.php' ?>"><span
                         class="octicon octicon-cloud-upload"></span> Subir
                     Actividad</a>
             </div>
@@ -175,7 +168,27 @@ $requestedEditId = isset($_GET['editId']) ? intval($_GET['editId']) : null;
                 'bodypump' => 'assets/img/bodypump.png',
                 'pilates' => 'assets/img/pilates.png'
             ];
-            foreach ($activities as $activity):
+            
+            if (empty($activities)):
+            ?>
+                <div class="col-12">
+                    <div class="alert alert-info text-center" role="alert">
+                        <h4 class="alert-heading">No hay actividades disponibles</h4>
+                        <p>Actualmente no hay actividades registradas<?php echo $activityDate ? ' para la fecha seleccionada' : ''; ?>.</p>
+                        <hr>
+                        <p class="mb-0">
+                            <a href="<?php echo $rutaBase . '/app/crearActividad.php' ?>" class="btn btn-primary">
+                                <span class="octicon octicon-plus"></span> Crear nueva actividad
+                            </a>
+                            <?php if ($activityDate): ?>
+                                <a href="index.php" class="btn btn-secondary">Ver todas las actividades</a>
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                </div>
+            <?php
+            else:
+                foreach ($activities as $activity):
                 $image = $imageMap[$activity->getType()] ?? 'assets/img/spinning2.png';
                 $aid = (int) $activity->getId();
                 $aidEsc = htmlspecialchars($aid);
@@ -190,16 +203,19 @@ $requestedEditId = isset($_GET['editId']) ? intval($_GET['editId']) : null;
                             alt="<?php echo ($activity->getType()); ?>">
                         <div class="card-body">
                             <h2 class="card-title display-4"><?php echo ($activity->getPlace()); ?></h2>
-                            <p class="card-text lead"><?php echo htmlspecialchars(formatActivityDate($activity->getDate())); ?></p>
+                            <p class="card-text lead">
+                                <?php echo htmlspecialchars(formatActivityDate($activity->getDate())); ?>
+                            </p>
                             <p class="card-text lead"><?php echo ($activity->getMonitor()); ?></p>
                             <p class="card-text"><span class="badge bg-info"><?php echo ($activity->getType()); ?></span>
                             </p>
 
                             <div class="edit-form" id="edit-form-<?php echo $aidEsc; ?>"
                                 style="<?php echo ($requestedEditId === $aid) ? 'display:block;' : 'display:none;'; ?> margin-top:10px;">
-                                <form method="POST" action="">
+                                <form method="POST" action="" onsubmit="saveScrollPosition(this)">
                                     <input type="hidden" name="form_action" value="update" />
                                     <input type="hidden" name="id" value="<?php echo $aidEsc; ?>" />
+                                    <input type="hidden" name="scroll_pos" value="0" class="scroll-pos-input" />
                                     <div class="mb-2">
                                         <label class="form-label">Tipo</label>
                                         <select name="type" class="form-control form-control-sm">
@@ -235,21 +251,22 @@ $requestedEditId = isset($_GET['editId']) ? intval($_GET['editId']) : null;
                             <div class="btn-group">
                                 <a class="d-none d-lg-block btn btn-success"
                                     href="index.php?editId=<?php echo $aidEsc; ?><?php echo $activityDate ? '&activityDate=' . urlencode($activityDate) : ''; ?>">Modificar</a>
-                                <form method="POST" action="" style="display:inline-block; margin:0;">
+                                <form method="POST" action="" style="display:inline-block; margin:0;"
+                                    onsubmit="saveScrollPosition(this)">
                                     <input type="hidden" name="form_action" value="delete" />
                                     <input type="hidden" name="id" value="<?php echo $aidEsc; ?>" />
+                                    <input type="hidden" name="scroll_pos" value="0" class="scroll-pos-input" />
                                     <button type="submit" class="d-none d-lg-block btn btn-danger">Borrar</button>
                                 </form>
                             </div>
                         </div>
                     </div>
                 </div>
-            <?php endforeach; ?>
+            <?php 
+                endforeach;
+            endif; 
+            ?>
         </div>
-    </div>
-
-    <div class="container">
-        <?php include __DIR__ . '/app/crearActividad.php'; ?>
     </div>
 
     <!-- Footer -->
@@ -265,11 +282,7 @@ $requestedEditId = isset($_GET['editId']) ? intval($_GET['editId']) : null;
 
     <!-- Bootstrap Core JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-        crossorigin="anonymous"></script>
-
-
-
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 
 </html>

@@ -7,18 +7,35 @@ class ActivityController
 {
     private $dao;
 
+    /**
+     * Constructor de la clase ActivityController
+     */
     public function __construct()
     {
         $this->dao = new ActivityDAO();
     }
 
 
+    /**
+     * Obtiene todas las actividades, opcionalmente filtradas por fecha
+     *
+     * @param string|null $date Fecha en formato 'Y-m-d' para filtrar actividades
+     * @return array Lista de actividades
+     */
     public function getAll($date = null)
     {
         return $this->dao->getAll($date);
     }
 
 
+    /**
+     * Crea una nueva actividad
+     * @param string $type Tipo de actividad
+     * @param string $monitor Nombre del monitor
+     * @param string $place Lugar de la actividad
+     * @param string $date Fecha y hora de la actividad en formato 'Y-m-d H:i:s'
+     * @return array Resultado de la operación con éxito o error
+     */
     public function create($type, $monitor, $place, $date)
     {
         if (empty($type) || empty($monitor) || empty($place) || empty($date)) {
@@ -52,6 +69,16 @@ class ActivityController
         }
     }
 
+
+    /**
+     * Actualiza una actividad existente
+     * @param int $id ID de la actividad a actualizar
+     * @param string $type Tipo de actividad
+     * @param string $monitor Nombre del monitor
+     * @param string $place Lugar de la actividad
+     * @param string $date Fecha y hora de la actividad en formato 'Y-m-d H:i:s'
+     * @return array Resultado de la operación con éxito o error
+     */
     public function update($id, $type, $monitor, $place, $date)
     {
         if (empty($id) || empty($type) || empty($monitor) || empty($place) || empty($date)) {
@@ -82,6 +109,11 @@ class ActivityController
         }
     }
 
+    /**
+     * Elimina una actividad por su ID
+     * @param int $id ID de la actividad a eliminar
+     * @return array Resultado de la operación con éxito o error
+     */
     public function delete($id)
     {
         if (empty($id)) {
