@@ -1,6 +1,3 @@
-<?php
-// Formulario separado para crear una actividad
-?>
 <form class="form-horizontal" method="POST" action="" id="SubirActividad">
 
     <input type="hidden" name="form_action" value="create" />
