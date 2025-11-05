@@ -51,33 +51,19 @@ class ActivityDAO
         $place = $activity->getPlace();
         $date = $activity->getDate();
 
-        $query = "INSERT INTO activities (type, monitor, place, date) VALUES (?, ?, ?, ?)";
+        $query = "INSERT INTO activities (type, monitor, place, date) VALUES ('$type', '$monitor', '$place', '$date')";
 
-        $stmt = $this->conn->prepare($query);
-        if (!$stmt) {
-            return false;
-        }
-
-        $stmt->bind_param("ssss", $type, $monitor, $place, $date);
-        $executed = $stmt->execute();
-
-        if ($executed) {
-            $insertId = $this->conn->insert_id;
-            $stmt->close();
-            return $insertId;
-        } else {
-            $stmt->close();
-            return false;
-        }
+        $stmt = mysqli_prepare($this->conn, $query);
+        return $stmt->execute();
     }
 
     public function update(Activity $activity)
     {
         $id = (int) $activity->getId();
-        $type = $this->conn->real_escape_string($activity->getType());
-        $monitor = $this->conn->real_escape_string($activity->getMonitor());
-        $place = $this->conn->real_escape_string($activity->getPlace());
-        $date = $this->conn->real_escape_string($activity->getDate());
+        $type = $activity->getType();
+        $monitor = $activity->getMonitor();
+        $place = $activity->getPlace();
+        $date = $activity->getDate();
 
         $query = "UPDATE activities 
                 SET type = '$type', monitor = '$monitor', place = '$place', date = '$date'
