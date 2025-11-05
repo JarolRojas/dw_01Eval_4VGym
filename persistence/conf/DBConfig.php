@@ -22,13 +22,5 @@ class DBConfig
 
         return self::$connection;
     }
-
-    public static function closeConnection()
-    {
-        if (self::$connection !== null) {
-            self::$connection->close();
-            self::$connection = null;
-        }
-    }
 }
 ?>
