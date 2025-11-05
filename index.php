@@ -168,13 +168,14 @@ $requestedEditId = isset($_GET['editId']) ? intval($_GET['editId']) : null;
                 'bodypump' => 'assets/img/bodypump.png',
                 'pilates' => 'assets/img/pilates.png'
             ];
-            
+
             if (empty($activities)):
-            ?>
+                ?>
                 <div class="col-12">
                     <div class="alert alert-info text-center" role="alert">
                         <h4 class="alert-heading">No hay actividades disponibles</h4>
-                        <p>Actualmente no hay actividades registradas<?php echo $activityDate ? ' para la fecha seleccionada' : ''; ?>.</p>
+                        <p>Actualmente no hay actividades
+                            registradas<?php echo $activityDate ? ' para la fecha seleccionada' : ''; ?>.</p>
                         <hr>
                         <p class="mb-0">
                             <a href="<?php echo $rutaBase . '/app/crearActividad.php' ?>" class="btn btn-primary">
@@ -186,85 +187,84 @@ $requestedEditId = isset($_GET['editId']) ? intval($_GET['editId']) : null;
                         </p>
                     </div>
                 </div>
-            <?php
+                <?php
             else:
                 foreach ($activities as $activity):
-                $image = $imageMap[$activity->getType()] ?? 'assets/img/spinning2.png';
-                $aid = (int) $activity->getId();
-                $aidEsc = htmlspecialchars($aid);
-                $dateValue = '';
-                if ($activity->getDate()) {
-                    $dateValue = date('Y-m-d\TH:i', strtotime($activity->getDate()));
-                }
-                ?>
-                <div class=" col-sm-12 col-md-6 col-lg-4 ">
-                    <div class="card ">
-                        <img class="card-img-top w-50 p-3 img-fluid mx-auto" src='<?php echo ($image); ?>'
-                            alt="<?php echo ($activity->getType()); ?>">
-                        <div class="card-body">
-                            <h2 class="card-title display-4"><?php echo ($activity->getPlace()); ?></h2>
-                            <p class="card-text lead">
-                                <?php echo htmlspecialchars(formatActivityDate($activity->getDate())); ?>
-                            </p>
-                            <p class="card-text lead"><?php echo ($activity->getMonitor()); ?></p>
-                            <p class="card-text"><span class="badge bg-info"><?php echo ($activity->getType()); ?></span>
-                            </p>
+                    $image = $imageMap[$activity->getType()] ?? 'assets/img/spinning2.png';
+                    $aid = (int) $activity->getId();
+                    $aidEsc = htmlspecialchars($aid);
+                    $dateValue = '';
+                    if ($activity->getDate()) {
+                        $dateValue = date('Y-m-d\TH:i', strtotime($activity->getDate()));
+                    }
+                    ?>
+                    <div class=" col-sm-12 col-md-6 col-lg-4 ">
+                        <div class="card ">
+                            <img class="card-img-top w-50 p-3 img-fluid mx-auto" src='<?php echo ($image); ?>'
+                                alt="<?php echo ($activity->getType()); ?>">
+                            <div class="card-body">
+                                <h2 class="card-title display-4"><?php echo ($activity->getPlace()); ?></h2>
+                                <p class="card-text lead">
+                                    <?php echo htmlspecialchars(formatActivityDate($activity->getDate())); ?>
+                                </p>
+                                <p class="card-text lead"><?php echo ($activity->getMonitor()); ?></p>
+                                <p class="card-text"><span class="badge bg-info"><?php echo ($activity->getType()); ?></span>
+                                </p>
 
-                            <div class="edit-form" id="edit-form-<?php echo $aidEsc; ?>"
-                                style="<?php echo ($requestedEditId === $aid) ? 'display:block;' : 'display:none;'; ?> margin-top:10px;">
-                                <form method="POST" action="" onsubmit="saveScrollPosition(this)">
-                                    <input type="hidden" name="form_action" value="update" />
-                                    <input type="hidden" name="id" value="<?php echo $aidEsc; ?>" />
-                                    <input type="hidden" name="scroll_pos" value="0" class="scroll-pos-input" />
-                                    <div class="mb-2">
-                                        <label class="form-label">Tipo</label>
-                                        <select name="type" class="form-control form-control-sm">
-                                            <option value="spinning" <?php echo $activity->getType() === 'spinning' ? 'selected' : ''; ?>>Spinning</option>
-                                            <option value="bodypump" <?php echo $activity->getType() === 'bodypump' ? 'selected' : ''; ?>>BodyPump</option>
-                                            <option value="pilates" <?php echo $activity->getType() === 'pilates' ? 'selected' : ''; ?>>Pilates</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label">Monitor</label>
-                                        <input type="text" name="monitor" class="form-control form-control-sm"
-                                            value="<?php echo htmlspecialchars($activity->getMonitor()); ?>" />
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label">Lugar</label>
-                                        <input type="text" name="place" class="form-control form-control-sm"
-                                            value="<?php echo htmlspecialchars($activity->getPlace()); ?>" />
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label">Fecha</label>
-                                        <input type="datetime-local" name="date" class="form-control form-control-sm"
-                                            value="<?php echo $dateValue; ?>" />
-                                    </div>
-                                    <div>
-                                        <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
-                                        <a href="index.php<?php echo $activityDate ? '?activityDate=' . urlencode($activityDate) : ''; ?>"
-                                            class="btn btn-secondary btn-sm">Cancelar</a>
-                                    </div>
-                                </form>
+                                <div class="edit-form" id="edit-form-<?php echo $aidEsc; ?>"
+                                    style="<?php echo ($requestedEditId === $aid) ? 'display:block;' : 'display:none;'; ?> margin-top:10px;">
+                                    <form method="POST" action="">
+                                        <input type="hidden" name="form_action" value="update" />
+                                        <input type="hidden" name="id" value="<?php echo $aidEsc; ?>" />
+                                        <input type="hidden" name="scroll_pos" value="0" class="scroll-pos-input" />
+                                        <div class="mb-2">
+                                            <label class="form-label">Tipo</label>
+                                            <select name="type" class="form-control form-control-sm">
+                                                <option value="spinning" <?php echo $activity->getType() === 'spinning' ? 'selected' : ''; ?>>Spinning</option>
+                                                <option value="bodypump" <?php echo $activity->getType() === 'bodypump' ? 'selected' : ''; ?>>BodyPump</option>
+                                                <option value="pilates" <?php echo $activity->getType() === 'pilates' ? 'selected' : ''; ?>>Pilates</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">Monitor</label>
+                                            <input type="text" name="monitor" class="form-control form-control-sm"
+                                                value="<?php echo htmlspecialchars($activity->getMonitor()); ?>" />
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">Lugar</label>
+                                            <input type="text" name="place" class="form-control form-control-sm"
+                                                value="<?php echo htmlspecialchars($activity->getPlace()); ?>" />
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">Fecha</label>
+                                            <input type="datetime-local" name="date" class="form-control form-control-sm"
+                                                value="<?php echo $dateValue; ?>" />
+                                        </div>
+                                        <div>
+                                            <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
+                                            <a href="index.php<?php echo $activityDate ? '?activityDate=' . urlencode($activityDate) : ''; ?>"
+                                                class="btn btn-secondary btn-sm">Cancelar</a>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
-                        </div>
-                        <div class="card-footer d-flex justify-content-center">
-                            <div class="btn-group">
-                                <a class="d-none d-lg-block btn btn-success"
-                                    href="index.php?editId=<?php echo $aidEsc; ?><?php echo $activityDate ? '&activityDate=' . urlencode($activityDate) : ''; ?>">Modificar</a>
-                                <form method="POST" action="" style="display:inline-block; margin:0;"
-                                    onsubmit="saveScrollPosition(this)">
-                                    <input type="hidden" name="form_action" value="delete" />
-                                    <input type="hidden" name="id" value="<?php echo $aidEsc; ?>" />
-                                    <input type="hidden" name="scroll_pos" value="0" class="scroll-pos-input" />
-                                    <button type="submit" class="d-none d-lg-block btn btn-danger">Borrar</button>
-                                </form>
+                            <div class="card-footer d-flex justify-content-center">
+                                <div class="btn-group">
+                                    <a class="d-none d-lg-block btn btn-success"
+                                        href="index.php?editId=<?php echo $aidEsc; ?><?php echo $activityDate ? '&activityDate=' . urlencode($activityDate) : ''; ?>">Modificar</a>
+                                    <form method="POST" action="" style="display:inline-block; margin:0;">
+                                        <input type="hidden" name="form_action" value="delete" />
+                                        <input type="hidden" name="id" value="<?php echo $aidEsc; ?>" />
+                                        <input type="hidden" name="scroll_pos" value="0" class="scroll-pos-input" />
+                                        <button type="submit" class="d-none d-lg-block btn btn-danger">Borrar</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            <?php 
+                <?php
                 endforeach;
-            endif; 
+            endif;
             ?>
         </div>
     </div>
