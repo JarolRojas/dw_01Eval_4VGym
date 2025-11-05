@@ -113,10 +113,14 @@ $activities = $controller->getAll($activityDate);
                     <hr />
                     <form action="" method="get" class="row g-2 align-items-center">
                         <div class="col-auto">
-                            <input name="activityDate" id="activityDate" class="form-control" type="date" value="<?php echo htmlspecialchars($activityDate ?: ''); ?>" />
+                            <input name="activityDate" id="activityDate" class="form-control" type="date"
+                                value="<?php echo htmlspecialchars($activityDate ?: ''); ?>" />
                         </div>
                         <div class="col-auto">
                             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Filter</button>
+                        </div>
+                        <div class="col-auto">
+                            <a href="index.php" class="btn btn-outline-secondary my-2 my-sm-0">Eliminar filtro</a>
                         </div>
                     </form>
                 </div>
@@ -217,21 +221,7 @@ $activities = $controller->getAll($activityDate);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
-        <script>
-            (function() {
-                try {
-                    const params = new URLSearchParams(window.location.search);
-                    if (params.has('activityDate')) {
-                        params.delete('activityDate');
-                        const newSearch = params.toString();
-                        const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '');
-                        history.replaceState(null, '', newUrl);
-                    }
-                } catch (e) {
-                    // no hacer nada si el navegador no soporta URLSearchParams
-                }
-            })();
-        </script>
+
 </body>
 
 </html>
