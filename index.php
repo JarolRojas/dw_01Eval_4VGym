@@ -20,21 +20,39 @@ if (isset($_SESSION['flash_message'])) {
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $type = isset($_POST['type']) ? trim($_POST['type']) : '';
-    $monitor = isset($_POST['monitor']) ? trim($_POST['monitor']) : '';
-    $place = isset($_POST['place']) ? trim($_POST['place']) : '';
-    $date = isset($_POST['date']) ? trim($_POST['date']) : '';
+    $formAction = isset($_POST['form_action']) ? $_POST['form_action'] : 'create';
 
-    $result = $controller->create($type, $monitor, $place, $date);
+    if ($formAction === 'create') {
+        $type = isset($_POST['type']) ? trim($_POST['type']) : '';
+        $monitor = isset($_POST['monitor']) ? trim($_POST['monitor']) : '';
+        $place = isset($_POST['place']) ? trim($_POST['place']) : '';
+        $date = isset($_POST['date']) ? trim($_POST['date']) : '';
 
-    if (isset($result['success']) && $result['success']) {
-        $_SESSION['flash_message'] = $result['message'];
-        $_SESSION['flash_type'] = 'success';
-        header('Location: index.php');
-        exit;
-    } else {
-        $message = $result['message'];
-        $messageType = 'danger';
+        $result = $controller->create($type, $monitor, $place, $date);
+
+        if (isset($result['success']) && $result['success']) {
+            $_SESSION['flash_message'] = $result['message'];
+            $_SESSION['flash_type'] = 'success';
+            header('Location: index.php');
+            exit;
+        } else {
+            $message = $result['message'];
+            $messageType = 'danger';
+        }
+    } elseif ($formAction === 'delete') {
+        $id = isset($_POST['id']) ? $_POST['id'] : null;
+        $result = $controller->delete($id);
+        if (isset($result['success']) && $result['success']) {
+            $_SESSION['flash_message'] = $result['message'];
+            $_SESSION['flash_type'] = 'success';
+            header('Location: index.php');
+            exit;
+        } else {
+            $_SESSION['flash_message'] = $result['message'];
+            $_SESSION['flash_type'] = 'danger';
+            header('Location: index.php');
+            exit;
+        }
     }
 }
 
@@ -83,7 +101,7 @@ $activities = $controller->getAll($activityDate);
                 </li>
             </ul>
             <div class="ml-auto">
-                <a type="button" class="btn btn-info " href=""><span class="octicon octicon-cloud-upload"></span> Subir
+                <a type="button" class="btn btn-info " href="#SubirActividad"><span class="octicon octicon-cloud-upload"></span> Subir
                     Actividad</a>
             </div>
         </div>
@@ -154,10 +172,14 @@ $activities = $controller->getAll($activityDate);
                             </p>
                         </div>
                         <div class="card-footer d-flex justify-content-center">
-                            <div class="btn-group">
-                                <a type="button" class="d-none d-lg-block  btn btn-success" href="">Modificar</a>
-                                <a type="button" class="d-none d-lg-block  btn btn-danger" href="">Borrar</a>
-                            </div>
+                                <div class="btn-group">
+                                    <a type="button" class="d-none d-lg-block  btn btn-success" href="">Modificar</a>
+                                    <form method="POST" action="" style="display:inline-block; margin:0;">
+                                        <input type="hidden" name="form_action" value="delete" />
+                                        <input type="hidden" name="id" value="<?php echo htmlspecialchars($activity->getId()); ?>" />
+                                        <button type="submit" class="d-none d-lg-block btn btn-danger">Borrar</button>
+                                    </form>
+                                </div>
                         </div>
                     </div>
                 </div>
@@ -166,7 +188,9 @@ $activities = $controller->getAll($activityDate);
     </div>
 
     <div class="container">
-        <form class="form-horizontal" method="POST" action="">
+        <form class="form-horizontal" method="POST" action="" id="SubirActividad">
+
+            <input type="hidden" name="form_action" value="create" />
 
             <div class="form-group">
                 <label for="type" class="col-sm-2 control-label">Tipo</label>
