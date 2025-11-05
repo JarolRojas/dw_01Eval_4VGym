@@ -39,6 +39,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = $result['message'];
             $messageType = 'danger';
         }
+    } elseif ($formAction === 'update') {
+        $id = isset($_POST['id']) ? $_POST['id'] : null;
+        $type = isset($_POST['type']) ? trim($_POST['type']) : '';
+        $monitor = isset($_POST['monitor']) ? trim($_POST['monitor']) : '';
+        $place = isset($_POST['place']) ? trim($_POST['place']) : '';
+        $date = isset($_POST['date']) ? trim($_POST['date']) : '';
+
+        $result = $controller->update($id, $type, $monitor, $place, $date);
+        if (isset($result['success']) && $result['success']) {
+            $_SESSION['flash_message'] = $result['message'];
+            $_SESSION['flash_type'] = 'success';
+            header('Location: index.php');
+            exit;
+        } else {
+            $_SESSION['flash_message'] = $result['message'];
+            $_SESSION['flash_type'] = 'danger';
+            header('Location: index.php');
+            exit;
+        }
     } elseif ($formAction === 'delete') {
         $id = isset($_POST['id']) ? $_POST['id'] : null;
         $result = $controller->delete($id);
@@ -57,8 +76,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 
+
+
 $activityDate = isset($_GET['activityDate']) ? $_GET['activityDate'] : null;
 $activities = $controller->getAll($activityDate);
+$requestedEditId = isset($_GET['editId']) ? intval($_GET['editId']) : null;
 
 ?>
 
@@ -101,7 +123,8 @@ $activities = $controller->getAll($activityDate);
                 </li>
             </ul>
             <div class="ml-auto">
-                <a type="button" class="btn btn-info " href="#SubirActividad"><span class="octicon octicon-cloud-upload"></span> Subir
+                <a type="button" class="btn btn-info " href="#SubirActividad"><span
+                        class="octicon octicon-cloud-upload"></span> Subir
                     Actividad</a>
             </div>
         </div>
@@ -159,6 +182,12 @@ $activities = $controller->getAll($activityDate);
             ];
             foreach ($activities as $activity):
                 $image = $imageMap[$activity->getType()] ?? 'assets/img/spinning2.png';
+                $aid = (int) $activity->getId();
+                $aidEsc = htmlspecialchars($aid);
+                $dateValue = '';
+                if ($activity->getDate()) {
+                    $dateValue = date('Y-m-d\TH:i', strtotime($activity->getDate()));
+                }
                 ?>
                 <div class=" col-sm-12 col-md-6 col-lg-4 ">
                     <div class="card ">
@@ -170,16 +199,53 @@ $activities = $controller->getAll($activityDate);
                             <p class="card-text lead"><?php echo ($activity->getMonitor()); ?></p>
                             <p class="card-text"><span class="badge bg-info"><?php echo ($activity->getType()); ?></span>
                             </p>
+
+                            <div class="edit-form" id="edit-form-<?php echo $aidEsc; ?>"
+                                style="<?php echo ($requestedEditId === $aid) ? 'display:block;' : 'display:none;'; ?> margin-top:10px;">
+                                <form method="POST" action="">
+                                    <input type="hidden" name="form_action" value="update" />
+                                    <input type="hidden" name="id" value="<?php echo $aidEsc; ?>" />
+                                    <div class="mb-2">
+                                        <label class="form-label">Tipo</label>
+                                        <select name="type" class="form-control form-control-sm">
+                                            <option value="spinning" <?php echo $activity->getType() === 'spinning' ? 'selected' : ''; ?>>Spinning</option>
+                                            <option value="bodypump" <?php echo $activity->getType() === 'bodypump' ? 'selected' : ''; ?>>BodyPump</option>
+                                            <option value="pilates" <?php echo $activity->getType() === 'pilates' ? 'selected' : ''; ?>>Pilates</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">Monitor</label>
+                                        <input type="text" name="monitor" class="form-control form-control-sm"
+                                            value="<?php echo htmlspecialchars($activity->getMonitor()); ?>" />
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">Lugar</label>
+                                        <input type="text" name="place" class="form-control form-control-sm"
+                                            value="<?php echo htmlspecialchars($activity->getPlace()); ?>" />
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">Fecha</label>
+                                        <input type="datetime-local" name="date" class="form-control form-control-sm"
+                                            value="<?php echo $dateValue; ?>" />
+                                    </div>
+                                    <div>
+                                        <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
+                                        <a href="index.php<?php echo $activityDate ? '?activityDate=' . urlencode($activityDate) : ''; ?>"
+                                            class="btn btn-secondary btn-sm">Cancelar</a>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                         <div class="card-footer d-flex justify-content-center">
-                                <div class="btn-group">
-                                    <a type="button" class="d-none d-lg-block  btn btn-success" href="">Modificar</a>
-                                    <form method="POST" action="" style="display:inline-block; margin:0;">
-                                        <input type="hidden" name="form_action" value="delete" />
-                                        <input type="hidden" name="id" value="<?php echo htmlspecialchars($activity->getId()); ?>" />
-                                        <button type="submit" class="d-none d-lg-block btn btn-danger">Borrar</button>
-                                    </form>
-                                </div>
+                            <div class="btn-group">
+                                <a class="d-none d-lg-block btn btn-success"
+                                    href="index.php?editId=<?php echo $aidEsc; ?><?php echo $activityDate ? '&activityDate=' . urlencode($activityDate) : ''; ?>">Modificar</a>
+                                <form method="POST" action="" style="display:inline-block; margin:0;">
+                                    <input type="hidden" name="form_action" value="delete" />
+                                    <input type="hidden" name="id" value="<?php echo $aidEsc; ?>" />
+                                    <button type="submit" class="d-none d-lg-block btn btn-danger">Borrar</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -245,6 +311,8 @@ $activities = $controller->getAll($activityDate);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
+
+
 
 </body>
 
